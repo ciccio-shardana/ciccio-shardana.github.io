@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Monte San Primo & Rifugio Martina · Alternative Montane</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root {
+  --bg: #09090b;
+  --surface: #121215;
+  --surface-raised: #18181c;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-subtle: #71717a;
+  --accent: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.18);
+  --green: #4ade80;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 96px;
+  overflow-x: hidden;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Top Header */
+header.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(9, 9, 11, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.back-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--surface-raised);
+  text-decoration: none;
+  transform: translateX(-2px);
+}
+.badge-tag {
+  font-size: 0.72rem;
+  font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  padding: 70px 24px 50px;
+  max-width: 1040px;
+  margin: 0 auto;
+  text-align: left;
+}
+.hero-bg-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  z-index: -1;
+  opacity: 0.28;
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+.hero-bg-layer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.2) contrast(1.1);
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.hero-title {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: #fff;
+  margin-bottom: 16px;
+}
+.kinetic-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px) scale(0.96);
+  filter: blur(6px);
+  animation: kineticReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes kineticReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.hero-desc {
+  max-width: 680px;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Flight Status Card */
+.flight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+}
+.flight-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.flight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+.flight-id {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.flight-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-family: 'Geist Mono', monospace;
+  color: var(--green);
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.flight-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+.route-visual {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 680px) {
+  .route-visual {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    text-align: center;
+  }
+  .route-step-divider { transform: rotate(90deg); }
+}
+.route-node .city {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.route-node .sub-city {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  font-family: 'Geist Mono', monospace;
+  margin-top: 2px;
+}
+.route-node .elev {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-family: 'Geist Mono', monospace;
+  background: rgba(245, 158, 11, 0.08);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.route-step-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.route-step-divider .line {
+  width: 60px;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--border-strong) 0, var(--border-strong) 4px, transparent 4px, transparent 8px);
+}
+.route-step-divider .label {
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+  font-family: 'Geist Mono', monospace;
+  text-transform: uppercase;
+}
+.flight-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  padding-top: 20px;
+  border-top: 1px dashed var(--border);
+}
+.metric-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+.metric-box .label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-family: 'Geist Mono', monospace;
+  color: var(--text-subtle);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.metric-box .value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+.metric-box .detail {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Sections & Grid */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: border-color 0.2s ease;
+}
+.card:hover {
+  border-color: var(--border-strong);
+}
+
+/* Highlight */
+.annotated {
+  position: relative;
+  display: inline;
+  font-weight: 500;
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: linear-gradient(120deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08));
+  border-bottom: 1.5px solid var(--accent);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-top: 8px;
+  box-shadow: 0 0 10px var(--accent);
+  flex-shrink: 0;
+}
+.timeline-content h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.timeline-content p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Map */
+#map {
+  height: 380px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+/* Gallery */
+.gal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.gal figure {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+.gal figure:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+.gal img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+.gal figcaption {
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.gal figcaption b {
+  display: block;
+  color: #fff;
+  font-size: 0.85rem;
+  margin-bottom: 2px;
+}
+
+/* Lightbox */
+#lb {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 2000;
+  padding: 20px;
+  cursor: zoom-out;
+}
+#lb.on { display: flex; }
+#lb img {
+  max-width: 92vw;
+  max-height: 80vh;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+#lb p {
+  color: var(--text-muted);
+  margin-top: 14px;
+  text-align: center;
+  font-size: 0.88rem;
+  max-width: 680px;
+}
+
+/* Checklist */
+.check label {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.check input {
+  margin-top: 4px;
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+.check input:checked + span {
+  text-decoration: line-through;
+  opacity: 0.45;
+}
+
+/* Magnetic Dock */
+.magnetic-dock {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 18, 21, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.6);
+  padding: 8px 12px;
+  border-radius: 999px;
+  max-width: 95vw;
+}
+.dock-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  white-space: nowrap;
+}
+.dock-item:hover {
+  color: #fff;
+  background: var(--surface-raised);
+  transform: translateY(-2px) scale(1.05);
+  text-decoration: none;
+}
+.dock-item.active {
+  background: var(--accent);
+  color: #000;
+  font-weight: 600;
+}
+.dock-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+}
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #000;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  margin-top: 10px;
+}
+.btn-action:hover {
+  background: #fcd34d;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <a href="index.html" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Torna al Weekend Rifugio Riva
+  </a>
+  <span class="badge-tag">Alternativa 3 · Triangolo Lariano</span>
+</header>
+
+<div class="hero">
+  <div class="hero-bg-layer">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Monte_San_Primo.jpg/960px-Monte_San_Primo.jpg" alt="Monte San Primo">
+  </div>
+  <div class="hero-tag">
+    <span>★ CIMA DEL LARIO 1.682M</span>
+    <span>•</span>
+    <span>POLENTA UNCIA NEL PAIOLO</span>
+  </div>
+  <h1 class="hero-title" id="heroTitle">
+    <span class="kinetic-word" style="animation-delay: 0.05s;">Monte</span>
+    <span class="kinetic-word" style="animation-delay: 0.12s;">San</span>
+    <span class="kinetic-word" style="animation-delay: 0.19s;">Primo</span>
+    <span class="kinetic-word" style="animation-delay: 0.26s;">&amp;</span>
+    <span class="kinetic-word" style="animation-delay: 0.33s;">Rifugio</span>
+    <span class="kinetic-word" style="animation-delay: 0.40s;">Martina</span>
+  </h1>
+  <p class="hero-desc">
+    La cima più alta del Triangolo Lariano con visuale contemporanea su Como, Lecco e la punta di Bellagio. Famoso sui social per la leggendaria polenta uncia del Rifugio Martina.
+  </p>
+</div>
+
+<div class="container">
+
+  <!-- Flight Status Card -->
+  <div class="flight-card">
+    <div class="flight-header">
+      <div class="flight-id">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        BOARDING PASS · ES-SANPRIMO-03
+      </div>
+      <div class="flight-status">Fattibile · Livello E (Escursionistico)</div>
+    </div>
+    
+    <div class="route-visual">
+      <div class="route-node">
+        <div class="city">Segrate</div>
+        <div class="sub-city">Milano Est</div>
+        <div class="elev">115 m</div>
+      </div>
+      <div class="route-step-divider">
+        <span class="label">Auto ~1h 20m (68 km)</span>
+        <div class="line"></div>
+      </div>
+      <div class="route-node">
+        <div class="city">Piano Rancio</div>
+        <div class="sub-city">La Baita / Parcheggio impianti</div>
+        <div class="elev">1.230 m</div>
+      </div>
+      <div class="route-step-divider">
+        <span class="label">Trek ~2h 30m vetta</span>
+        <div class="line"></div>
+      </div>
+      <div class="route-node">
+        <div class="city">Vetta San Primo</div>
+        <div class="sub-city">Sosta Rifugio Martina (1.280 m)</div>
+        <div class="elev">1.682 m</div>
+      </div>
+    </div>
+
+    <div class="flight-metrics">
+      <div class="metric-box">
+        <div class="label">Dislivello</div>
+        <div class="value">+100 m / +450 m</div>
+        <div class="detail">+100m solo rifugio, +450m fino in vetta</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Durata Cammino</div>
+        <div class="value">45 min / 2h 30m</div>
+        <div class="detail">45m a/r rifugio, 2h30 a/r vetta panoramica</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Guida da Segrate</div>
+        <div class="value">~1h 20m</div>
+        <div class="detail">SS36 Erba ➔ Ghisallo ➔ Bellagio</div>
+      </div>
+      <div class="metric-box">
+        <div class="label">Tipo Sentiero</div>
+        <div class="value">Dorsale Panoramica</div>
+        <div class="detail">Prati aperti d'alta quota e vista a 360°</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bozza & Recensioni -->
+  <div class="two-col">
+    <!-- Bozza Flessibile -->
+    <div class="card">
+      <h3 class="section-title">⏱️ Bozza di Giornata Flessibile</h3>
+      <p class="section-desc">Ideale per godere della luce del mattino in cresta e del pranzo al rifugio.</p>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h4>08:30 – 10:00 · Da Segrate a Piano Rancio</h4>
+            <p>Viaggio via Brianza ed Erba, salita per il colle della Madonna del Ghisallo (panoramica sui ciclisti e sul lago) fino a Piano Rancio.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h4>10:00 – 12:15 · Trekking Dorsale & Cima</h4>
+            <p>Salita sui crinali erbosi aperti: colpo d'occhio straordinario che abbraccia entrambi i rami del lago fino alla croce di vetta a 1.682 m.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h4>12:30 – 14:30 · Il Rito della Polenta Uncia</h4>
+            <p>Discesa al Rifugio Martina per il celebre pranzo: polenta uncia servita nel paiolo di rame con formaggio fuso, burro nocciola e aglio.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <h4>15:00 – 16:45 · Ghisallo e Rientro</h4>
+            <p>Breve sosta fotografica al belvedere del Ghisallo e rientro comodo verso Segrate.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recensioni & Prenotazioni -->
+    <div class="card">
+      <h3 class="section-title">💬 Recensioni Social & Come Prenotare</h3>
+      <p class="section-desc">Tutto sulla polenta uncia più virale della Lombardia.</p>
+      
+      <div style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px;">
+        Su TikTok e Instagram il **Rifugio Martina** è un'istituzione: la loro <span class="annotated">Polenta Uncia nel paiolo di rame</span> fa regolarmente il giro del web.
+        <br><br>
+        L'ambiente è autentico, spartano e molto allegro. <span class="annotated">La prenotazione telefonica nel weekend è obbligatoria</span> con giorni di anticipo per trovare posto a sedere nei turni di pranzo.
+      </div>
+
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px;">
+        <h4 style="font-size: 0.9rem; color: #fff; margin-bottom: 8px;">Come Prenotare il Tavolo:</h4>
+        <ul style="font-size: 0.85rem; color: var(--text-muted); list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li>• <strong>Prenotazione solo telefonica:</strong> preferibile chiamare tra le <strong>17:30 e le 20:30</strong>.</li>
+          <li>• <strong>Telefono fisso:</strong> <a href="tel:+39031964695">031 964695</a></li>
+          <li>• <strong>Cellulare:</strong> <a href="tel:+393356191148">335 6191148</a></li>
+          <li>• <strong>Apertura autunnale:</strong> Sabato e domenica a pranzo (verificare sempre telefonicamente).</li>
+        </ul>
+        <a href="tel:+39031964695" class="btn-action">Chiama il Rifugio Martina</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mappa -->
+  <div>
+    <h3 class="section-title">🗺️ Mappa Itinerario Stradale & Sentiero</h3>
+    <p class="section-desc">Itinerario da Segrate al Parcheggio La Baita con sentiero verso il Martina e la Cima.</p>
+    <div id="map"></div>
+  </div>
+
+  <!-- Galleria -->
+  <div>
+    <h3 class="section-title">📸 Galleria Fotografica Ufficiale</h3>
+    <p class="section-desc">Scorci del Monte San Primo e dei crinali del Triangolo Lariano (Wikimedia Commons).</p>
+    <div class="gal">
+      <figure data-full="https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Monte_San_Primo.jpg/960px-Monte_San_Primo.jpg">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Monte_San_Primo.jpg/960px-Monte_San_Primo.jpg" alt="Monte San Primo">
+        <figcaption><b>Monte San Primo (1.682 m)</b>La dorsale aperta verso la vetta. Foto: Deoxys93 (CC BY-SA 3.0)</figcaption>
+      </figure>
+      <figure data-full="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Monte_San_Primo_-_sentiero.jpg/960px-Monte_San_Primo_-_sentiero.jpg">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Monte_San_Primo_-_sentiero.jpg/960px-Monte_San_Primo_-_sentiero.jpg" alt="Sentiero San Primo">
+        <figcaption><b>Sentiero di cresta</b>Camminata panoramica erbosa. Foto: Mario Falcetti (CC BY 4.0)</figcaption>
+      </figure>
+      <figure data-full="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Monte_San_Primo_N_view.png/960px-Monte_San_Primo_N_view.png">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Monte_San_Primo_N_view.png/960px-Monte_San_Primo_N_view.png" alt="Vista Nord San Primo">
+        <figcaption><b>Vista verso Nord</b>Scorcio aperto sul ramo di Bellagio e Menaggio. Foto: Pampuco (CC BY 4.0)</figcaption>
+      </figure>
+      <figure data-full="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Monte_San_Primo_b.JPG/960px-Monte_San_Primo_b.JPG">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Monte_San_Primo_b.JPG/960px-Monte_San_Primo_b.JPG" alt="San Primo Inverno/Autunno">
+        <figcaption><b>I pascoli d'alta quota</b>Atmosfera tersa e pulita. Foto: Bolo77 (CC BY-SA 4.0)</figcaption>
+      </figure>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <div class="card">
+    <h3 class="section-title">🎒 Checklist Zaino (Salvataggio Automatico)</h3>
+    <p class="section-desc">Cosa portare per la dorsale del San Primo.</p>
+    <div class="check" id="checkList"></div>
+  </div>
+
+  <!-- Link -->
+  <div class="card">
+    <h3 class="section-title">🔗 Link Ufficiali e Approfondimenti</h3>
+    <ul style="margin: 12px 0 0 20px; font-size: 0.9rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 8px;">
+      <li><a href="https://www.rifugiomartina.com/" target="_blank" rel="noopener">Sito Ufficiale Rifugio Martina</a> · Menu, storia e contatti per la prenotazione</li>
+      <li><a href="https://www.bellagiolakecomo.com" target="_blank" rel="noopener">Bellagio Lake Como</a> · Portale turistico ufficiale del territorio</li>
+      <li><a href="https://www.triangololariano.it" target="_blank" rel="noopener">Comunità Montana Triangolo Lariano</a> · Sentieri e itinerari naturalistici</li>
+    </ul>
+  </div>
+
+</div>
+
+<div id="lb"><img alt=""><p></p></div>
+
+<!-- Magnetic Dock -->
+<nav class="magnetic-dock">
+  <a href="index.html" class="dock-item">🍂 Rifugio Riva</a>
+  <div class="dock-sep"></div>
+  <a href="resinelli.html" class="dock-item">1. Resinelli</a>
+  <a href="menaggio.html" class="dock-item">2. Menaggio</a>
+  <a href="san-primo.html" class="dock-item active">3. San Primo</a>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+// Lightbox
+const lb = document.getElementById('lb');
+document.querySelectorAll('.gal figure').forEach(f => {
+  f.onclick = () => {
+    lb.querySelector('img').src = f.dataset.full;
+    lb.querySelector('p').textContent = f.querySelector('figcaption').textContent;
+    lb.classList.add('on');
+  };
+});
+lb.onclick = () => lb.classList.remove('on');
+addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+
+// Checklist
+const items = [
+  'Giacca a vento (la cresta del San Primo è spesso esposta alle brezze del lago)',
+  'Scarponcini da trekking con buona aderenza sull\'erba umida',
+  'Occhiali da sole e crema solare (percorso completamente aperto)',
+  'Borraccia d\'acqua da almeno 1L',
+  'Contanti per il rifugio (la connessione POS sui crinali può essere debole)'
+];
+const saved = JSON.parse(localStorage.getItem('sanprimo-check') || '[]');
+document.getElementById('checkList').innerHTML = items.map((t, i) =>
+  `<label><input type="checkbox" data-i="${i}" ${saved.includes(i) ? 'checked' : ''}><span>${t}</span></label>`
+).join('');
+document.querySelectorAll('#checkList input').forEach(c => {
+  c.onchange = () => {
+    localStorage.setItem('sanprimo-check', JSON.stringify([...document.querySelectorAll('#checkList input:checked')].map(x => +x.dataset.i)));
+  };
+});
+
+// Map Leaflet
+const SEGRATE = [45.4905, 9.2930];
+const LA_BAITA = [45.9220, 9.2310];
+const VETTA_SAN_PRIMO = [45.9155, 9.2098];
+const RIFUGIO_MARTINA = [45.9205, 9.2155];
+
+const map = L.map('map').setView([45.75, 9.26], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+L.marker(SEGRATE).addTo(map).bindPopup('<b>Segrate</b><br>Partenza in auto');
+L.marker(LA_BAITA).addTo(map).bindPopup('<b>Piano Rancio / La Baita (1.230 m)</b><br>Parcheggio e partenza');
+L.marker(RIFUGIO_MARTINA).addTo(map).bindPopup('<b>Rifugio Martina (1.280 m)</b><br>Polenta uncia e ristoro');
+L.marker(VETTA_SAN_PRIMO).addTo(map).bindPopup('<b>Cima Monte San Primo (1.682 m)</b><br>Punto più alto a 360°');
+
+L.polyline([LA_BAITA, RIFUGIO_MARTINA, VETTA_SAN_PRIMO], { color: '#f59e0b', weight: 4, dashArray: '6 8' }).addTo(map).bindTooltip('Sentiero cresta ~1h 15m salita');
+
+fetch('https://router.project-osrm.org/route/v1/driving/' + SEGRATE[1] + ',' + SEGRATE[0] + ';' + LA_BAITA[1] + ',' + LA_BAITA[0] + '?overview=full&geometries=geojson')
+  .then(r => r.json())
+  .then(d => {
+    const rt = d.routes[0];
+    const line = L.geoJSON(rt.geometry, { style: { color: '#fbbf24', weight: 4 } }).addTo(map);
+    map.fitBounds(line.getBounds().extend(VETTA_SAN_PRIMO), { padding: [30, 30] });
+  })
+  .catch(() => {
+    L.polyline([SEGRATE, LA_BAITA], { color: '#fbbf24', weight: 3, dashArray: '2 8' }).addTo(map);
+    map.fitBounds([SEGRATE, VETTA_SAN_PRIMO], { padding: [30, 30] });
+  });
+</script>
+</body>
+</html>
