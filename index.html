@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Francesco Aymerich — Personal Hub & Projects Portal</title>
+  <meta name="description" content="Personal hub, progetti di neuroingegneria, robotica, automazione e timeline dei siti web pubblicati di Francesco Aymerich.">
+  
+  <!-- Google Fonts: Geist & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS & RESET (Componentry Dark Minimal System)
+       ========================================================================== */
+    :root {
+      --bg: #09090b;
+      --surface: #121215;
+      --surface-raised: #18181c;
+      --surface-hover: #1f1f25;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --border-accent: rgba(56, 189, 248, 0.35);
+      
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --text-subtle: #71717a;
+      
+      --accent: #38bdf8;         /* Sky / Cyan */
+      --accent-glow: rgba(56, 189, 248, 0.16);
+      --purple: #a855f7;
+      --green: #4ade80;
+      --amber: #f59e0b;
+      --orange: #f97316;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-pill: 9999px;
+      
+      --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      
+      --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      letter-spacing: -0.02em;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.06), transparent 45%),
+                  radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.04), transparent 40%),
+                  var(--bg);
+      padding-bottom: 120px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background grid */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== */
+    header.site-header {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      background: rgba(9, 9, 11, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .nav-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 10px var(--green);
+      animation: pulse-dot 2.5s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+
+    .search-trigger-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      transition: var(--transition-smooth);
+    }
+
+    .search-trigger-btn:hover {
+      background: var(--surface-raised);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .kbd-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      color: var(--text);
+    }
+
+    /* ==========================================================================
+       HERO SECTION WITH KINETIC TEXT REVEAL
+       ========================================================================== */
+    .hero-section {
+      padding: 68px 0 44px;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid var(--border-accent);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    /* Kinetic Text Reveal */
+    .kinetic-word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+      filter: blur(8px);
+      animation: kineticReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes kineticReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .hero-lead {
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+      line-height: 1.65;
+      color: var(--text-muted);
+      max-width: 680px;
+      margin-bottom: 32px;
+    }
+
+    .hero-lead strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: var(--radius-pill);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      transition: var(--transition-smooth);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: #000;
+      box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-primary:hover {
+      background: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--surface-raised);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    /* ==========================================================================
+       METRICS STRIP (Componentry Flight Status Style)
+       ========================================================================== */
+    .metrics-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 24px 0 56px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metrics-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--purple), transparent);
+    }
+
+    .metrics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+    }
+
+    .metrics-id {
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metrics-badge {
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .metric-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      transition: var(--transition-smooth);
+    }
+
+    .metric-box:hover {
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .metric-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ==========================================================================
+       SECTION HEADERS
+       ========================================================================== */
+    .section-wrap {
+      padding: 44px 0;
+      scroll-margin-top: 80px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 6px;
+      max-width: 600px;
+    }
+
+    /* Category Filter Pills */
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      transition: var(--transition-smooth);
+    }
+
+    .filter-btn:hover {
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+
+    .filter-btn.active {
+      background: var(--text);
+      color: #000;
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       ORBIT CARDS GRID (Progetti)
+       ========================================================================== */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-smooth);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .project-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    .project-card::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card:hover::after {
+      opacity: 1;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-cat {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .card-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-subtle);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .card-badge.live {
+      color: var(--green);
+      border-color: rgba(74, 222, 128, 0.25);
+      background: rgba(74, 222, 128, 0.08);
+    }
+
+    .project-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .project-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex-grow: 1;
+      margin-bottom: 18px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .tag-item {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-subtle);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .card-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .card-action span {
+      transition: transform 0.2s ease;
+    }
+
+    .project-card:hover .card-action span {
+      transform: translateX(4px);
+    }
+
+    /* ==========================================================================
+       TIMELINE DEI SITI WEB PUBBLICATI (Release Radar / Changelog)
+       ========================================================================== */
+    .timeline-wrapper {
+      position: relative;
+      padding-left: 28px;
+      margin-top: 32px;
+    }
+
+    /* Glowing timeline line */
+    .timeline-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      bottom: 24px;
+      left: 7px;
+      width: 2px;
+      background: repeating-linear-gradient(
+        180deg,
+        rgba(56, 189, 248, 0.45) 0,
+        rgba(56, 189, 248, 0.45) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+    }
+
+    .timeline-node {
+      position: relative;
+      margin-bottom: 28px;
+    }
+
+    .timeline-node:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Timeline bullet */
+    .timeline-bullet {
+      position: absolute;
+      left: -28px;
+      top: 18px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .timeline-bullet::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+    }
+
+    .timeline-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .timeline-content:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+      transform: translateX(4px);
+    }
+
+    .timeline-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .timeline-date {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--accent);
+      background: var(--accent-glow);
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+    }
+
+    .timeline-type {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+    }
+
+    .timeline-heading {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .timeline-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .timeline-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 4px;
+      align-self: flex-start;
+    }
+
+    .timeline-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ==========================================================================
+       CURRICULUM VITAE & PROFILO PROFESSIONALE
+       ========================================================================== */
+    .cv-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .cv-title-group h3 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+    }
+
+    .cv-title-group .cv-role {
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .cv-title-group .cv-edu {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .cv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .cv-block {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .cv-block-title {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cv-skill-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .cv-skill-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .cv-skill-list li strong {
+      color: var(--text);
+    }
+
+    .cv-actions-bar {
+      border-top: 1px dashed var(--border);
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .cv-actions-info {
+      font-size: 0.82rem;
+      color: var(--text-subtle);
+      font-family: var(--font-mono);
+    }
+
+    /* ==========================================================================
+       SOCIAL & CONTATTI
+       ========================================================================== */
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .social-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition-smooth);
+    }
+
+    .social-card:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-raised);
+      transform: translateY(-3px);
+    }
+
+    .social-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .social-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .social-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .social-handle {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ==========================================================================
+       MAGNETIC DOCK (Centrata e Flottante in Basso)
+       ========================================================================== */
+    .magnetic-dock {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 18, 21, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+      padding: 7px 10px;
+      border-radius: var(--radius-pill);
+      max-width: calc(100vw - 32px);
+      overflow-x: auto;
+    }
+
+    .dock-btn {
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dock-btn:hover {
+      color: #ffffff;
+      background: var(--surface-raised);
+      transform: translateY(-2px);
+    }
+
+    .dock-btn.active {
+      background: var(--text);
+      color: #000000;
+      font-weight: 600;
+    }
+
+    .dock-sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border-strong);
+      margin: 0 2px;
+    }
+
+    /* ==========================================================================
+       COMMAND PALETTE MODALE (⌘K)
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 200;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 80px 20px 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeInModal 0.2s ease forwards;
+    }
+
+    @keyframes fadeInModal {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .palette-box {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .palette-search-bar {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .palette-search-bar input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1.05rem;
+      color: #ffffff;
+      font-family: var(--font-sans);
+    }
+
+    .palette-search-bar input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    .palette-list {
+      max-height: 380px;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .palette-section-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-subtle);
+      padding: 8px 12px 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .palette-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .palette-item:hover,
+    .palette-item.selected {
+      background: var(--surface-raised);
+      color: #ffffff;
+    }
+
+    .palette-item .item-meta {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .palette-footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==========================================================================
+       PRINT STYLES FOR CV (A4 Optimized)
+       ========================================================================== */
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding-bottom: 0 !important;
+      }
+      body::before, .site-header, .magnetic-dock, .modal-overlay, .hero-actions, .filter-pills, .card-action, .cv-actions-bar {
+        display: none !important;
+      }
+      .cv-card {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+      }
+      .cv-title-group h3 {
+        color: #000000 !important;
+      }
+      .cv-role, .metric-value, .cv-block-title {
+        color: #0284c7 !important;
+      }
+      .cv-block {
+        border: 1px solid #e2e8f0 !important;
+        background: #f8fafc !important;
+      }
+      .cv-skill-list li, .cv-edu {
+        color: #334155 !important;
+      }
+      .section-wrap:not(#cv) {
+        display: none !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .section-head {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="site-header">
+    <div class="container nav-inner">
+      <a href="#hero" class="brand-link">
+        <div class="brand-avatar">FA</div>
+        <span>Francesco Aymerich</span>
+      </a>
+
+      <div class="nav-status">
+        <span class="status-dot"></span>
+        <span>Bioingegneria · Open to code</span>
+      </div>
+
+      <button class="search-trigger-btn" id="openSearchBtn" aria-label="Cerca">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Cerca</span>
+        <span class="kbd-pill">⌘K</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="container">
+
+    <!-- HERO SECTION -->
+    <section class="hero-section" id="hero">
+      <div class="hero-eyebrow">
+        <span>●</span>
+        <span>Bioingegneria · Neurotech · Software Craftsman</span>
+      </div>
+
+      <h1 class="hero-title">
+        <span class="kinetic-word" style="animation-delay: 0.05s;">Francesco</span>
+        <span class="kinetic-word" style="animation-delay: 0.15s;">Aymerich</span>
+      </h1>
+
+      <p class="hero-lead">
+        Studente magistrale in <strong>Ingegneria Biomedica</strong> al <strong>Politecnico di Milano</strong>.
+        Connetto neuroscienze computazionali, simulazioni neuronali, machine learning su segnali biologici e interfacce web raffinate e reattive.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#progetti" class="btn btn-primary">
+          <span>Esplora i Progetti</span>
+          <span>↓</span>
+        </a>
+        <a href="#cv" class="btn btn-secondary">
+          <span>Curriculum Vitae</span>
+          <span>→</span>
+        </a>
+        <button class="btn btn-secondary" id="heroSearchBtn">
+          <span>Navigazione Rapida (⌘K)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- METRICS STRIP -->
+    <div class="metrics-card">
+      <div class="metrics-header">
+        <div class="metrics-id">LIVE STATUS · PROFILE RADAR</div>
+        <div class="metrics-badge">POLIMI MASTER · 2026</div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-label">Formazione</div>
+          <div class="metric-value">Ingegneria Biomedica</div>
+          <div class="metric-sub">Politecnico di Milano</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Area Ricerca</div>
+          <div class="metric-value">Neuroengineering</div>
+          <div class="metric-sub">IAF, Hodgkin-Huxley & EMG</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Web & Workspace</div>
+          <div class="metric-value">6+ Piattaforme</div>
+          <div class="metric-sub">Zero-Build & Doppio Click Ready</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Stato</div>
+          <div class="metric-value">Disponibile</div>
+          <div class="metric-sub">Milano, IT · Open for Collab</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGETTI SECTION -->
+    <section class="section-wrap" id="progetti">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Workspace Hub</div>
+          <h2 class="section-title">Vetrina Progetti & Moduli</h2>
+          <p class="section-desc">Accedi direttamente alle piattaforme, pitch, dispense interattive e strumenti ospitati nel workspace.</p>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="filter-pills" id="filterPills">
+          <button class="filter-btn active" data-filter="all">Tutti (6)</button>
+          <button class="filter-btn" data-filter="neuro-robotics">Neurotech & Robotica</button>
+          <button class="filter-btn" data-filter="tools">Strumenti & AI</button>
+          <button class="filter-btn" data-filter="trips">Outdoor & Viaggi</button>
+        </div>
+      </div>
+
+      <div class="projects-grid" id="projectsGrid">
+
+        <!-- Card 1: Robotics Pitch -->
+        <a href="../robotics-pitch/index.html" class="project-card" data-category="neuro-robotics">
+          <div class="card-top">
+            <span class="card-cat">Robotica</span>
+            <span class="card-badge live">● Live Deck</span>
+          </div>
+          <h3>Your First Robot — 3 Ideas, 1 Winner</h3>
+          <p>Slide deck interattivo con visualizzazioni immersive per analizzare tre percorsi di robotica educativa e hobbistica, stimando complessità, costi e curva di apprendimento.</p>
+          <div class="card-tags">
+            <span class="tag-item">Interactive Slides</span>
+            <span class="tag-item">Hardware</span>
+            <span class="tag-item">Vanilla JS</span>
+          </div>
+          <div class="card-action">
+            <span>Avvia Presentazione</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Card 2: Automazione Appunti -->
+        <a href="../automazione-appunti/presentazione_interattiva.html" class="project-card" data-category="tools">
+          <div class="card-top">
+            <span class="card-cat">Workflow AI</span>
+            <span class="card-badge live">● Pitch Interattivo</span>
+          </div>
+          <h3>Automazione Appunti Bioingegneria</h3>
+          <p>Pipeline per convertire gli appunti da Markdown/Obsidian a report LaTeX formali con template PoliMi, integrando parsing automatico ed espansione testi via AI.</p>
+          <div class="card-tags">
+            <span class="tag-item">Python</span>
+            <span class="tag-item">LaTeX PoliMi</span>
+            <span class="tag-item">Obsidian</span>
+            <span class="tag-item">AI Polish</span>
+          </div>
+          <div class="card-action">
+            <span>Esplora la Pipeline</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Card 3: Neuroengineering Course -->
+        <a href="../../neuroengineering_course/README.md" class="project-card" data-category="neuro-robotics">
+          <div class="card-top">
+            <span class="card-cat">Neuroingegneria</span>
+            <span class="card-badge">● Repository</span>
+          </div>
+          <h3>Computational Neuroscience & EMG</h3>
+          <p>Simulazione e analisi quantitativa di neuroni computazionali (Integrate-and-Fire, modelli Hodgkin-Huxley in NESTML), stimolazione neuronale e machine learning su segnali EMG.</p>
+          <div class="card-tags">
+            <span class="tag-item">Python</span>
+            <span class="tag-item">NESTML</span>
+            <span class="tag-item">PyTorch</span>
+            <span class="tag-item">Signal Processing</span>
+          </div>
+          <div class="card-action">
+            <span>Consulta Modelli & Codice</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Card 4: Antigravity Guide -->
+        <a href="../../antigravity-guide.html" class="project-card" data-category="tools">
+          <div class="card-top">
+            <span class="card-cat">Documentazione</span>
+            <span class="card-badge live">● Web Portal</span>
+          </div>
+          <h3>Antigravity Interactive Guide</h3>
+          <p>Manuale e guida architettonica completa all'ecosistema Antigravity, con sitemap interattiva, sintassi slash commands, cheat sheet CLI e personalizzazione delle skill.</p>
+          <div class="card-tags">
+            <span class="tag-item">Antigravity 2.0</span>
+            <span class="tag-item">Sitemap</span>
+            <span class="tag-item">Dark Minimal</span>
+          </div>
+          <div class="card-action">
+            <span>Apri la Guida</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Card 5: Weekend d'Autunno Rifugio Riva -->
+        <a href="../../VIAGGI/17-18 ottobre 2026/index.html" class="project-card" data-category="trips">
+          <div class="card-top">
+            <span class="card-cat">Outdoor & Mappe</span>
+            <span class="card-badge live">● Web App</span>
+          </div>
+          <h3>Weekend Rifugio Riva (Valsassina)</h3>
+          <p>Piattaforma cartografica e scheda tecnica per escursioni autunnali tra Grigne, Resinelli e Menaggio. Include mappe Leaflet interattive, boarding pass e quote altimetriche.</p>
+          <div class="card-tags">
+            <span class="tag-item">Leaflet.js</span>
+            <span class="tag-item">Boarding Pass UI</span>
+            <span class="tag-item">Trekking</span>
+          </div>
+          <div class="card-action">
+            <span>Visualizza Itinerario</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- Card 6: Langhe & Pavia -->
+        <a href="../../VIAGGI/11-13 settembre 2026/index.html" class="project-card" data-category="trips">
+          <div class="card-top">
+            <span class="card-cat">Travel Scouting</span>
+            <span class="card-badge live">● Guide Statiche</span>
+          </div>
+          <h3>Langhe, Monferrato & Pavia</h3>
+          <p>Raccolta di itinerari enogastronomici e visite storico-culturali corredate da schede borghi, cantine panoramiche e punti d'interesse lombardo-piemontesi.</p>
+          <div class="card-tags">
+            <span class="tag-item">Componentry Cards</span>
+            <span class="tag-item">Heritage</span>
+            <span class="tag-item">Itinerari</span>
+          </div>
+          <div class="card-action">
+            <span>Apri Guida Langhe</span>
+            <span>→</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- TIMELINE DEI SITI WEB PUBBLICATI -->
+    <section class="section-wrap" id="timeline">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Release Radar</div>
+          <h2 class="section-title">Timeline dei Siti Web Pubblicati</h2>
+          <p class="section-desc">Evoluzione cronologica dei siti statici, dashboard e presentazioni interattive rilasciate nel workspace.</p>
+        </div>
+      </div>
+
+      <div class="timeline-wrapper">
+
+        <!-- Node 1: Personal Hub -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">14 Ottobre 2026</span>
+              <span class="timeline-type">Hub Centrale · v1.0</span>
+            </div>
+            <h4 class="timeline-heading">Personal Hub & Projects Portal</h4>
+            <p class="timeline-desc">Lancio dell'hub personale unificato in stile Componentry Dark Minimal con Command Palette integrata, CV print-ready e dock magnetica.</p>
+            <a href="#hero" class="timeline-link">Sei qui (Home Hub) ↑</a>
+          </div>
+        </div>
+
+        <!-- Node 2: Rifugio Riva -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">13-14 Ottobre 2026</span>
+              <span class="timeline-type">Outdoor Web App</span>
+            </div>
+            <h4 class="timeline-heading">Weekend d'Autunno · Rifugio Riva & Grigne</h4>
+            <p class="timeline-desc">Guida escursionistica ad alta precisione con selettore alternative (Resinelli, Menaggio, San Primo), mappe Leaflet OSM e schede dislivello.</p>
+            <a href="../../VIAGGI/17-18 ottobre 2026/index.html" class="timeline-link">Apri sito Rifugio Riva ↗</a>
+          </div>
+        </div>
+
+        <!-- Node 3: Antigravity Guide -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">8 Ottobre 2026</span>
+              <span class="timeline-type">Documentazione Interattiva</span>
+            </div>
+            <h4 class="timeline-heading">Antigravity Interactive Guide</h4>
+            <p class="timeline-desc">Portale documentale per l'ecosistema agentico Antigravity: architettura, customization, cheat-sheet dei comandi e scorciatoie.</p>
+            <a href="../../antigravity-guide.html" class="timeline-link">Apri Guida Antigravity ↗</a>
+          </div>
+        </div>
+
+        <!-- Node 4: Automazione Appunti -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">8 Ottobre 2026</span>
+              <span class="timeline-type">Pitch Ingegneristico</span>
+            </div>
+            <h4 class="timeline-heading">Automazione Appunti Bioingegneria (PoliMi)</h4>
+            <p class="timeline-desc">Presentazione interattiva che confronta 3 percorsi tecnologici per automatizzare la scrittura di tesi e dispense da Obsidian a LaTeX.</p>
+            <a href="../automazione-appunti/presentazione_interattiva.html" class="timeline-link">Apri Presentazione Automazione ↗</a>
+          </div>
+        </div>
+
+        <!-- Node 5: Robotics Pitch -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">8 Ottobre 2026</span>
+              <span class="timeline-type">Interactive Slide Deck</span>
+            </div>
+            <h4 class="timeline-heading">Your First Robot Pitch Deck</h4>
+            <p class="timeline-desc">Applicazione a diapositive per esplorare idee di robotica (bracci robotici, rover e sistemi autonomi) con filtri di fattibilità e componenti.</p>
+            <a href="../robotics-pitch/index.html" class="timeline-link">Apri Robotics Pitch ↗</a>
+          </div>
+        </div>
+
+        <!-- Node 6: Langhe & Monferrato -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">3 Settembre 2026</span>
+              <span class="timeline-type">Guida Itinerario</span>
+            </div>
+            <h4 class="timeline-heading">Guida di Viaggio · Langhe & Monferrato</h4>
+            <p class="timeline-desc">Itinerario per weekend tra cantine, borghi medievali e percorsi panoramici con card di approfondimento e tappe culinarie.</p>
+            <a href="../../VIAGGI/11-13 settembre 2026/index.html" class="timeline-link">Apri Guida Langhe ↗</a>
+          </div>
+        </div>
+
+        <!-- Node 7: Pavia -->
+        <div class="timeline-node">
+          <div class="timeline-bullet"></div>
+          <div class="timeline-content">
+            <div class="timeline-meta">
+              <span class="timeline-date">28 Agosto 2026</span>
+              <span class="timeline-type">Scheda Territoriale</span>
+            </div>
+            <h4 class="timeline-heading">Gita a Pavia & Certosa</h4>
+            <p class="timeline-desc">Prima pubblicazione statica per esplorare il patrimonio storico della città universitaria e dei dintorni.</p>
+            <a href="../../VIAGGI/1-2 settembre 2026/index.html" class="timeline-link">Apri Scheda Pavia ↗</a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CURRICULUM VITAE & PROFILO PROFESSIONALE -->
+    <section class="section-wrap" id="cv">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Profilo & Competenze</div>
+          <h2 class="section-title">Curriculum Vitae</h2>
+          <p class="section-desc">Panoramica del percorso accademico, aree di ricerca e stack tecnico, predisposto per la stampa e l'export PDF.</p>
+        </div>
+      </div>
+
+      <div class="cv-card">
+        <div class="cv-header">
+          <div class="cv-title-group">
+            <h3>Francesco Aymerich</h3>
+            <div class="cv-role">Ingegnere Biomedico · Specializzazione in Neuroingegneria</div>
+            <div class="cv-edu">Politecnico di Milano — Laurea Magistrale in Biomedical Engineering</div>
+          </div>
+
+          <button class="btn btn-primary" id="printCvBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Scarica / Stampa CV (PDF)</span>
+          </button>
+        </div>
+
+        <div class="cv-grid">
+          <!-- Block 1 -->
+          <div class="cv-block">
+            <div class="cv-block-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m10 15 5-3-5-3v6Z"></path></svg>
+              <span>Neuroingegneria Computazionale</span>
+            </div>
+            <ul class="cv-skill-list">
+              <li><strong>Modelli Neuronali:</strong> Hodgkin-Huxley, Leaky Integrate-and-Fire (IAF), NESTML e simulazione di reti sinaptiche.</li>
+              <li><strong>Segnali Biologici:</strong> Filtraggio ed elaborazione EMG/EEG, estrazione di feature nel dominio tempo/frequenza.</li>
+              <li><strong>Ingegneria dei Tessuti:</strong> Medicina rigenerativa e modelli biomedici quantitativi.</li>
+            </ul>
+          </div>
+
+          <!-- Block 2 -->
+          <div class="cv-block">
+            <div class="cv-block-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span>Machine Learning & Codice</span>
+            </div>
+            <ul class="cv-skill-list">
+              <li><strong>Linguaggi:</strong> Python (PyTorch, NumPy, SciPy, Pandas, Scikit-Learn), Bash/Zsh scripting.</li>
+              <li><strong>Documentazione Tecnica:</strong> LaTeX avanzato (template formali PoliMi), Markdown, automazione Obsidian.</li>
+              <li><strong>Strumenti:</strong> Git, Jupyter Notebook, NEST Simulator, VS Code, Antigravity CLI.</li>
+            </ul>
+          </div>
+
+          <!-- Block 3 -->
+          <div class="cv-block">
+            <div class="cv-block-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              <span>Architettura Web & UI</span>
+            </div>
+            <ul class="cv-skill-list">
+              <li><strong>Zero-Build Architecture:</strong> Creazione di web app statiche eseguibili con doppio click locale senza server.</li>
+              <li><strong>Design System:</strong> Dark Minimal (ispirato a Componentry.dev e Vercel), CSS moderno, flexbox/grid fluide.</li>
+              <li><strong>Librerie:</strong> Leaflet.js per mappe cartografiche, micro-interazioni CSS/JS native.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="cv-actions-bar">
+          <div class="cv-actions-info">
+            Layout ottimizzato per la stampa A4 · Premi il pulsante sopra per salvare come PDF direttamente dal browser.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTATTI & SOCIAL -->
+    <section class="section-wrap" id="contatti">
+      <div class="section-head">
+        <div>
+          <div class="section-tag">Connettiti</div>
+          <h2 class="section-title">Contatti & Canali</h2>
+          <p class="section-desc">Canali di contatto e profili professionali per approfondire progetti, collaborazioni o ricerche.</p>
+        </div>
+      </div>
+
+      <div class="social-grid">
+        <!-- GitHub -->
+        <a href="https://github.com/francesco-aymerich" target="_blank" rel="noopener noreferrer" class="social-card">
+          <div class="social-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+          </div>
+          <div class="social-info">
+            <div class="social-name">GitHub</div>
+            <div class="social-handle">@francesco-aymerich</div>
+          </div>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="https://linkedin.com/in/francesco-aymerich" target="_blank" rel="noopener noreferrer" class="social-card">
+          <div class="social-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+          </div>
+          <div class="social-info">
+            <div class="social-name">LinkedIn</div>
+            <div class="social-handle">Francesco Aymerich</div>
+          </div>
+        </a>
+
+        <!-- Instagram -->
+        <a href="https://instagram.com/aymerich" target="_blank" rel="noopener noreferrer" class="social-card">
+          <div class="social-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          </div>
+          <div class="social-info">
+            <div class="social-name">Instagram</div>
+            <div class="social-handle">@aymerich</div>
+          </div>
+        </a>
+
+        <!-- Mail -->
+        <a href="mailto:francesco.aymerich@example.com?subject=Contatto%20da%20Personal%20Hub" class="social-card">
+          <div class="social-icon-box">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          </div>
+          <div class="social-info">
+            <div class="social-name">Email</div>
+            <div class="social-handle">francesco.aymerich@...</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FLOATING MAGNETIC DOCK ==================== -->
+  <nav class="magnetic-dock" aria-label="Navigazione rapida">
+    <a href="#hero" class="dock-btn active" data-target="hero">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+      <span>Home</span>
+    </a>
+    <div class="dock-sep"></div>
+    <a href="#progetti" class="dock-btn" data-target="progetti">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+      <span>Progetti</span>
+    </a>
+    <a href="#timeline" class="dock-btn" data-target="timeline">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      <span>Timeline</span>
+    </a>
+    <a href="#cv" class="dock-btn" data-target="cv">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+      <span>CV</span>
+    </a>
+    <a href="#contatti" class="dock-btn" data-target="contatti">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      <span>Contatti</span>
+    </a>
+  </nav>
+
+  <!-- ==================== COMMAND PALETTE (⌘K) ==================== -->
+  <div class="modal-overlay" id="searchModal" role="dialog" aria-modal="true" aria-label="Command Palette">
+    <div class="palette-box">
+      <div class="palette-search-bar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" color="var(--accent)"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="paletteInput" placeholder="Cerca progetto, tecnologia, viaggio o sezione... (es. robot, latex, cv)">
+        <span class="kbd-pill">ESC per chiudere</span>
+      </div>
+
+      <div class="palette-list" id="paletteResults">
+        <!-- Results dynamically populated -->
+      </div>
+
+      <div class="palette-footer">
+        <div><span>↑ / ↓ per navigare</span> · <span>Invio per aprire</span></div>
+        <div><span>FA Personal Hub</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // 1. FILTER PILLS INTERACTION
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const projectCards = document.querySelectorAll('.project-card');
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.dataset.filter;
+
+          projectCards.forEach(card => {
+            if (filter === 'all' || card.dataset.category === filter) {
+              card.style.display = 'flex';
+              card.style.opacity = '1';
+              card.style.transform = 'none';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // 2. CV PRINT / DOWNLOAD HANDLER
+      const printCvBtn = document.getElementById('printCvBtn');
+      if (printCvBtn) {
+        printCvBtn.addEventListener('click', () => {
+          window.print();
+        });
+      }
+
+      // 3. COMMAND PALETTE SEARCH INDEX
+      const searchItems = [
+        { title: "Your First Robot — 3 Ideas", category: "Progetti", url: "../robotics-pitch/index.html", meta: "Slide Deck · Hardware · Robotica" },
+        { title: "Automazione Appunti Bioingegneria", category: "Progetti", url: "../automazione-appunti/presentazione_interattiva.html", meta: "LaTeX · Obsidian · PoliMi" },
+        { title: "Computational Neuroscience & EMG", category: "Progetti", url: "../../neuroengineering_course/README.md", meta: "Python · NESTML · Modelli HH" },
+        { title: "Antigravity Interactive Guide", category: "Progetti", url: "../../antigravity-guide.html", meta: "Sitemap · Agentic AI · Docs" },
+        { title: "Weekend Rifugio Riva (Valsassina)", category: "Viaggi", url: "../../VIAGGI/17-18 ottobre 2026/index.html", meta: "Leaflet · Trekking · Grigne" },
+        { title: "Langhe, Monferrato & Pavia", category: "Viaggi", url: "../../VIAGGI/11-13 settembre 2026/index.html", meta: "Guide Itinerario · Heritage" },
+        { title: "Timeline Siti Web Pubblicati", category: "Sezioni", url: "#timeline", meta: "Changelog e Release Radar" },
+        { title: "Curriculum Vitae & Competenze", category: "Sezioni", url: "#cv", meta: "Ingegneria Biomedica · Stampa PDF" },
+        { title: "Contatti & Canali Social", category: "Sezioni", url: "#contatti", meta: "GitHub, LinkedIn, Instagram, Mail" },
+        { title: "GitHub Profilo", category: "Social", url: "https://github.com/francesco-aymerich", meta: "Repository e Codice" },
+        { title: "LinkedIn Profilo", category: "Social", url: "https://linkedin.com/in/francesco-aymerich", meta: "Rete Professionale" },
+        { title: "Instagram Profilo", category: "Social", url: "https://instagram.com/aymerich", meta: "Foto e Viaggi" },
+        { title: "Invia Email Diretta", category: "Social", url: "mailto:francesco.aymerich@example.com", meta: "Contatto mailto" }
+      ];
+
+      const searchModal = document.getElementById('searchModal');
+      const openSearchBtn = document.getElementById('openSearchBtn');
+      const heroSearchBtn = document.getElementById('heroSearchBtn');
+      const paletteInput = document.getElementById('paletteInput');
+      const paletteResults = document.getElementById('paletteResults');
+
+      let selectedIndex = 0;
+      let currentMatches = [];
+
+      function renderPalette(query = "") {
+        const q = query.trim().toLowerCase();
+        currentMatches = searchItems.filter(item => 
+          item.title.toLowerCase().includes(q) ||
+          item.meta.toLowerCase().includes(q) ||
+          item.category.toLowerCase().includes(q)
+        );
+
+        selectedIndex = 0;
+        paletteResults.innerHTML = "";
+
+        if (currentMatches.length === 0) {
+          paletteResults.innerHTML = `
+            <div style="padding: 24px; text-align: center; color: var(--text-subtle); font-size: 0.88rem;">
+              Nessun risultato trovato per "${query}"
+            </div>
+          `;
+          return;
+        }
+
+        // Group by category
+        const groups = {};
+        currentMatches.forEach((item, idx) => {
+          if (!groups[item.category]) groups[item.category] = [];
+          groups[item.category].push({ item, idx });
+        });
+
+        for (const [catName, list] of Object.entries(groups)) {
+          const catTitle = document.createElement('div');
+          catTitle.className = 'palette-section-title';
+          catTitle.textContent = catName;
+          paletteResults.appendChild(catTitle);
+
+          list.forEach(({ item, idx }) => {
+            const el = document.createElement('a');
+            el.href = item.url;
+            el.className = `palette-item ${idx === selectedIndex ? 'selected' : ''}`;
+            el.dataset.index = idx;
+            el.innerHTML = `
+              <div style="display:flex; flex-direction:column; gap:2px;">
+                <span style="font-weight:500;">${item.title}</span>
+                <span style="font-size:0.75rem; color:var(--text-subtle); font-family:var(--font-mono);">${item.meta}</span>
+              </div>
+              <span class="item-meta">Apri ↵</span>
+            `;
+
+            el.addEventListener('click', () => {
+              closePalette();
+            });
+
+            paletteResults.appendChild(el);
+          });
+        }
+      }
+
+      function openPalette() {
+        searchModal.classList.add('open');
+        paletteInput.value = "";
+        renderPalette("");
+        setTimeout(() => paletteInput.focus(), 50);
+      }
+
+      function closePalette() {
+        searchModal.classList.remove('open');
+      }
+
+      openSearchBtn.addEventListener('click', openPalette);
+      if (heroSearchBtn) heroSearchBtn.addEventListener('click', openPalette);
+
+      // Keyboard navigation
+      window.addEventListener('keydown', (e) => {
+        // Toggle Cmd+K / Ctrl+K
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          if (searchModal.classList.contains('open')) {
+            closePalette();
+          } else {
+            openPalette();
+          }
+        }
+
+        if (searchModal.classList.contains('open')) {
+          if (e.key === 'Escape') {
+            closePalette();
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentMatches.length > 0) {
+              selectedIndex = (selectedIndex + 1) % currentMatches.length;
+              updateSelection();
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentMatches.length > 0) {
+              selectedIndex = (selectedIndex - 1 + currentMatches.length) % currentMatches.length;
+              updateSelection();
+            }
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentMatches[selectedIndex]) {
+              const targetUrl = currentMatches[selectedIndex].url;
+              closePalette();
+              if (targetUrl.startsWith('http')) {
+                window.open(targetUrl, '_blank');
+              } else {
+                window.location.href = targetUrl;
+              }
+            }
+          }
+        }
+      });
+
+      function updateSelection() {
+        const items = paletteResults.querySelectorAll('.palette-item');
+        items.forEach(item => {
+          if (parseInt(item.dataset.index, 10) === selectedIndex) {
+            item.classList.add('selected');
+            item.scrollIntoView({ block: 'nearest' });
+          } else {
+            item.classList.remove('selected');
+          }
+        });
+      }
+
+      paletteInput.addEventListener('input', (e) => {
+        renderPalette(e.target.value);
+      });
+
+      searchModal.addEventListener('click', (e) => {
+        if (e.target === searchModal) {
+          closePalette();
+        }
+      });
+
+      // 4. MAGNETIC DOCK ACTIVE SPY
+      const sections = document.querySelectorAll('section[id], header[id]');
+      const dockBtns = document.querySelectorAll('.dock-btn');
+
+      window.addEventListener('scroll', () => {
+        let currentSection = 'hero';
+        const scrollPosition = window.scrollY + 200;
+
+        sections.forEach(section => {
+          const top = section.offsetTop;
+          const height = section.offsetHeight;
+          if (scrollPosition >= top && scrollPosition < top + height) {
+            currentSection = section.getAttribute('id');
+          }
+        });
+
+        dockBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.target === currentSection);
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>
